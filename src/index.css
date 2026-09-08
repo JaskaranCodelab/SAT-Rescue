@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply bg-bg text-dark font-sans;
+  }
+  .dark body {
+    @apply bg-[#0b1322] text-slate-100;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-card dark:bg-[#111c30] rounded-2xl shadow-card border border-slate-100 dark:border-slate-800;
+  }
+  .card-hover {
+    @apply hover:shadow-card-hover transition-shadow;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-blue-700;
+  }
+  .btn-ai {
+    @apply btn bg-ai text-white hover:bg-purple-800;
+  }
+  .btn-success {
+    @apply btn bg-success text-white hover:bg-emerald-700;
+  }
+  .btn-outline {
+    @apply btn border border-slate-200 dark:border-slate-700 text-dark dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800;
+  }
+  .btn-ghost {
+    @apply btn text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+.animate-glow-pulse {
+  animation: glowPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spinSlow 3s linear infinite;
+}
+
+@keyframes floatParticle {
+  0% { transform: translateY(0); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: translateY(-24px); opacity: 0; }
+}
+.animate-particle {
+  animation: floatParticle 2.6s ease-in-out infinite;
+}
+
+@keyframes scanBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+.animate-scan {
+  animation: scanBar 1.4s linear infinite;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
