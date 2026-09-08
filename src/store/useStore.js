@@ -91,7 +91,7 @@ export const useStore = create((set, get) => ({
     corruptionDetection: true,
     autoValidation: true,
     confidenceThreshold: 75,
-    theme: 'light'
+    theme: 'dark'
   }),
   setSettings: (settings) => {
     saveToStorage(STORAGE_KEYS.settings, settings);
