@@ -4,7 +4,6 @@ import { useStore } from './store/useStore.js';
 import Sidebar from './components/Sidebar.jsx';
 import Header from './components/Header.jsx';
 import Dashboard from './pages/Dashboard.jsx';
-import SatelliteData from './pages/SatelliteData.jsx';
 import RecoverData from './pages/RecoverData.jsx';
 import PastRecoveries from './pages/PastRecoveries.jsx';
 import Analytics from './pages/Analytics.jsx';
@@ -12,7 +11,6 @@ import Settings from './pages/Settings.jsx';
 
 const pageTitles = {
   dashboard: { title: 'Recover Telemetry Data', subtitle: 'Upload your raw telemetry file and let SAT-Rescue AI recover missing or corrupted data.' },
-  generator: { title: 'Satellite Data', subtitle: 'Generate synthetic satellite telemetry and export it as CSV, JSON, or TXT.' },
   recover: { title: 'Recover Data', subtitle: 'Run SAT-Rescue AI to reconstruct and validate your telemetry.' },
   history: { title: 'Past Recoveries', subtitle: 'Revisit previously recovered telemetry files.' },
   analytics: { title: 'Analytics', subtitle: 'Track recovery performance and data health.' },
@@ -37,7 +35,6 @@ export default function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard': return <Dashboard />;
-      case 'generator': return <SatelliteData />;
       case 'recover': return <RecoverData />;
       case 'history': return <PastRecoveries />;
       case 'analytics': return <Analytics />;

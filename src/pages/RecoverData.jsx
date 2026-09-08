@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useStore } from '../store/useStore.js';
 import WorkflowStepper from '../components/WorkflowStepper.jsx';
 import FileUpload from '../components/FileUpload.jsx';
 import DemoDataSelector from '../components/DemoDataSelector.jsx';
-import RecoveryEngine from '../components/RecoveryEngine.jsx';
+import AnimatedRecoveryButton from '../components/AnimatedRecoveryButton.jsx';
 import RecoveryProgress from '../components/RecoveryProgress.jsx';
 import RecoveryMetrics from '../components/RecoveryMetrics.jsx';
-import TelemetryChart from '../components/TelemetryChart.jsx';
 import LiveLogs from '../components/LiveLogs.jsx';
 import ValidationPanel from '../components/ValidationPanel.jsx';
 import ComparisonTable from '../components/ComparisonTable.jsx';
@@ -18,13 +17,12 @@ import { useRecovery } from '../hooks/useRecovery.js';
 export default function RecoverData() {
   const {
     workflowStep, setWorkflowStep, fileInfo, clearFile,
-    fileName, rows, series, analysis, recoveryResult, recoveryState,
+    fileName, rows, analysis, recoveryResult, recoveryState,
     progress, phase, logs, validated, recoveredRows
   } = useStore();
   const { runRecovery } = useRecovery();
   const [revealed, setRevealed] = useState(0);
 
-  const canStart = Boolean(fileInfo) && recoveryState !== 'running';
   const isComplete = recoveryState === 'complete';
   const isRunning = recoveryState === 'running';
   const visibleCount = isRunning || isComplete ? Math.max(revealed, Math.floor((rows?.length || 0) * Math.max(progress, 1) / 100)) : Infinity;
@@ -57,24 +55,10 @@ export default function RecoverData() {
 
       {workflowStep >= 1 && (
         <div className="space-y-6">
-          <RecoveryEngine
-            original={series}
-            recovered={recoveryResult?.data ? seriesView(recoveryResult.data, analysis) : undefined}
-            analysis={analysis}
+          <AnimatedRecoveryButton
+            state={recoveryState}
+            onClick={runRecovery}
           />
-
-          {recoveryState === 'analyzed' && !isComplete && (
-            <div className="flex justify-center">
-              <button
-                onClick={runRecovery}
-                disabled={!canStart}
-                className="btn-ai px-8 py-3 text-base shadow-glow"
-              >
-                <Play size={18} />
-                Start AI Recovery
-              </button>
-            </div>
-          )}
 
           {isRunning && (
             <RecoveryProgress progress={progress} phase={phase} />
@@ -84,7 +68,6 @@ export default function RecoverData() {
             running={isRunning}
             complete={isComplete}
             progress={progress}
-            analysis={analysis}
           />
 
           {isComplete && recoveryResult && (
@@ -106,10 +89,6 @@ export default function RecoverData() {
               visibleCount={visibleCount}
               analysis={analysis}
             />
-          )}
-
-          {isComplete && recoveryResult && (
-            <TelemetryChart original={series} recovered={seriesView(recoveryResult.data, analysis)} />
           )}
 
           {(isRunning || isComplete) && logs.length > 0 && (
@@ -134,7 +113,7 @@ export default function RecoverData() {
   );
 }
 
-function RealTimeRecommendation({ running, complete, progress, analysis }) {
+function RealTimeRecommendation({ running, complete, progress }) {
   if (complete) return null;
   if (running) {
     return (
@@ -152,33 +131,5 @@ function RealTimeRecommendation({ running, complete, progress, analysis }) {
       </div>
     );
   }
-  if (analysis && (analysis.missingCount > 0 || analysis.corruptCount > 0)) {
-    return (
-      <div className="card p-5 flex items-center justify-between gap-4 border-ai/20 bg-ai/5">
-        <p className="text-sm text-slate-500 dark:text-slate-300">
-          <span className="font-bold text-error">{analysis.missingCount + analysis.corruptCount}</span> issues detected in{' '}
-          <span className="font-bold text-ai">{Object.values(analysis.fields || {}).filter((f) => f.missingCount > 0 || f.corruptCount > 0).length}</span> fields.
-          Run the AI recovery engine to reconstruct them.
-        </p>
-        <span className="text-xs text-ai whitespace-nowrap">Ready to recover</span>
-      </div>
-    );
-  }
   return null;
-}
-
-function seriesView(rows, analysis) {
-  if (!rows || !rows.length) return [];
-  let primary = null;
-  const fields = Object.values(analysis?.fields || {}).filter((f) => f.numeric);
-  if (fields.length) {
-    primary = fields[0].name;
-  } else {
-    const first = rows[0];
-    if (first) primary = Object.keys(first).find((k) => k !== '__ecc' && Number.isFinite(Number(first[k])));
-  }
-  return rows.map((r) => {
-    const n = primary && r ? Number(r[primary]) : NaN;
-    return Number.isFinite(n) ? n : null;
-  });
 }

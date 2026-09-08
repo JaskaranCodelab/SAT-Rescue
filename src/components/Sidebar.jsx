@@ -6,14 +6,12 @@ import {
   BarChart3,
   Settings,
   Satellite,
-  SatelliteDish,
   X
 } from 'lucide-react';
 import { useStore } from '../store/useStore.js';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'generator', label: 'Satellite Data', icon: SatelliteDish },
   { id: 'recover', label: 'Recover Data', icon: DatabaseZap },
   { id: 'history', label: 'Past Recoveries', icon: History },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
