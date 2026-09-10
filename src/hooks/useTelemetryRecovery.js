@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore.js';
-import { MLRecoveryService } from '../services/mlRecoveryService.js';
+import { TelemetryRecoveryService } from '../services/telemetryRecoveryService.js';
 
 function nowTime() {
   const d = new Date();
@@ -14,8 +14,9 @@ function sleep(ms) {
 function buildLogs(result, analysis) {
   const logs = [];
   const push = (level, message) => logs.push({ level, message });
+  const counts = result.methodCounts || {};
 
-  push('info', 'Initializing recovery engine');
+  push('info', 'Initializing telemetry recovery engine');
   push('info', `Reading ${analysis.totalPackets} telemetry packets across ${analysis.headers?.length || 0} fields`);
 
   let missing = analysis.missingCount || 0;
@@ -31,13 +32,16 @@ function buildLogs(result, analysis) {
     push('info', 'No corrupted values detected');
   }
 
-  push('info', 'Applying physics-based field bounds & robust statistics');
-  push('info', 'Learning cross-field correlations for prediction');
-  push('info', 'Fitting linear regression predictors per field');
-  push('info', 'Running Kalman smoother state estimation');
-  push('info', 'Reconstructing missing packets via polynomial interpolation + prediction ensemble');
-  push('success', `Recovered ${result.missingRecovered} missing / ${result.corruptRepaired} corrupted values`);
+  push('info', 'Method 1 · Fitting polynomial interpolation across valid samples');
+  push('info', 'Method 2 · Running Kalman smoother state estimation');
+  push('info', 'Method 3 · Fitting linear regression on time-index trend');
+  push('info', 'Balancing method ensemble per corrupted cell');
 
+  const total = (counts.interpolation || 0) + (counts.kalman || 0) + (counts.regression || 0);
+  if (total > 0) {
+    push('success', `Recovered ${total} cells via ML ensemble (interpolation ${counts.interpolation || 0} · kalman ${counts.kalman || 0} · regression ${counts.regression || 0})`);
+  }
+  push('success', `Repaired ${result.missingRecovered} missing / ${result.corruptRepaired} corrupted values`);
   push('info', `Integrity improved ${result.integrityBefore.toFixed(1)}% -> ${result.integrityAfter.toFixed(1)}%`);
   push('info', 'Embedding CRC-16 / CRC-32 + Hamming(7,4) ECC checksums per packet');
   push('success', 'Recovery paths complete');
@@ -50,7 +54,7 @@ function countFieldsWith(analysis, key) {
   return Object.values(fields).filter((f) => (f[key] || 0) > 0).length;
 }
 
-export function useRecovery() {
+export function useTelemetryRecovery() {
   const timers = useRef([]);
 
   const cleanupTimers = () => {
@@ -65,8 +69,8 @@ export function useRecovery() {
 
   const runRecovery = async () => {
     const store = useStore.getState();
-    const { rows, series, analysis, settings, fileName } = store;
-    const origin = rows && rows.length > 0 ? rows : seriesToRows(series);
+    const { rows, analysis, settings, fileName } = store;
+    const origin = rows && rows.length > 0 ? rows : (store.series || []).map((v, i) => ({ value: v }));
     if (!origin || origin.length === 0) return;
 
     store.setRecoveryState('running');
@@ -76,7 +80,7 @@ export function useRecovery() {
     store.setValidated(false);
     store.setRecoveredRows([]);
 
-    const service = new MLRecoveryService(settings);
+    const service = new TelemetryRecoveryService(settings);
     const result = service.recover(origin, analysis);
     const logs = buildLogs(result, analysis);
 
@@ -139,8 +143,4 @@ export function useRecovery() {
   };
 
   return { runRecovery, cleanup: cleanupTimers };
-}
-
-function seriesToRows(series) {
-  return (series || []).map((v, i) => ({ id: i + 1, value: v }));
 }

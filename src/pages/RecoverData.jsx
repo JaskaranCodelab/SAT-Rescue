@@ -8,19 +8,20 @@ import DemoDataSelector from '../components/DemoDataSelector.jsx';
 import AnimatedRecoveryButton from '../components/AnimatedRecoveryButton.jsx';
 import RecoveryProgress from '../components/RecoveryProgress.jsx';
 import RecoveryMetrics from '../components/RecoveryMetrics.jsx';
+import MlMethodBreakdown from '../components/MlMethodBreakdown.jsx';
 import LiveLogs from '../components/LiveLogs.jsx';
 import ValidationPanel from '../components/ValidationPanel.jsx';
 import ComparisonTable from '../components/ComparisonTable.jsx';
 import DownloadPanel from '../components/DownloadPanel.jsx';
-import { useRecovery } from '../hooks/useRecovery.js';
+import { useTelemetryRecovery } from '../hooks/useTelemetryRecovery.js';
 
 export default function RecoverData() {
   const {
-    workflowStep, setWorkflowStep, fileInfo, clearFile,
+    workflowStep, setWorkflowStep, clearFile,
     fileName, rows, analysis, recoveryResult, recoveryState,
     progress, phase, logs, validated, recoveredRows
   } = useStore();
-  const { runRecovery } = useRecovery();
+  const { runRecovery } = useTelemetryRecovery();
   const [revealed, setRevealed] = useState(0);
 
   const isComplete = recoveryState === 'complete';
@@ -69,6 +70,10 @@ export default function RecoverData() {
             complete={isComplete}
             progress={progress}
           />
+
+          {(isRunning || isComplete) && (
+            <MlMethodBreakdown />
+          )}
 
           {isComplete && recoveryResult && (
             <>
@@ -124,7 +129,7 @@ function RealTimeRecommendation({ running, complete, progress }) {
             <span className="relative inline-flex h-3 w-3 rounded-full bg-ai" />
           </span>
           <p className="text-sm text-slate-500 dark:text-slate-300">
-            Reconstructing in real time — recovered packets stream below as they complete.
+            Applying Interpolation, Kalman Smoothing & Linear Regression — recovered packets stream below.
           </p>
         </div>
         <span className="text-sm font-bold text-ai">{Math.round(progress)}%</span>

@@ -11,7 +11,7 @@ import Settings from './pages/Settings.jsx';
 
 const pageTitles = {
   dashboard: { title: 'Recover Telemetry Data', subtitle: 'Upload your raw telemetry file and let SAT-Rescue AI recover missing or corrupted data.' },
-  recover: { title: 'Recover Data', subtitle: 'Run SAT-Rescue AI to reconstruct and validate your telemetry.' },
+  recover: { title: 'Recover Data', subtitle: 'Recover telemetry using ML ensemble — Interpolation · Kalman Smoothing · Linear Regression.' },
   history: { title: 'Past Recoveries', subtitle: 'Revisit previously recovered telemetry files.' },
   analytics: { title: 'Analytics', subtitle: 'Track recovery performance and data health.' },
   settings: { title: 'Settings', subtitle: 'Configure recovery parameters and preferences.' }

@@ -4,6 +4,7 @@ import {
   outlierIndices,
   median,
   mad,
+  recoverPatternSequences,
   round
 } from '../utils/mlAlgorithms.js';
 import {
@@ -319,6 +320,22 @@ export class MLRecoveryService {
     });
 
     let textFilled = 0;
+    headers.forEach((h) => {
+      const field = fields[h];
+      if (field && field.numeric) return;
+      const low = h.toLowerCase();
+      if (!['id', 'packet_id', 'packetid', 'seq', 'sequence', 'frame', 'event_id', 'eventid', 'serial', 'identifier'].includes(low)) return;
+      const idVals = recoveredRows.map((r) => (r ? r[h] : null));
+      const filled = recoverPatternSequences(idVals);
+      recoveredRows.forEach((r, i) => {
+        if (!r || isGood(r[h])) return;
+        if (filled[i] !== null && filled[i] !== undefined && String(filled[i]) !== String(r[h])) {
+          r[h] = filled[i];
+          missingRecovered++;
+        }
+      });
+    });
+
     headers.forEach((h) => {
       const field = fields[h];
       if (field && field.numeric) return;
